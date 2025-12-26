@@ -2,44 +2,137 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Happy Birthday 🎂</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Birthday Countdown 🎂</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .count-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 30px;
+      font-weight: bold;
+      color: #ff4081;
+    }
+
+    .label {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- HERO SECTION -->
-  <section class="hero">
-    <h1>🎉 Happy Birthday 🎉</h1>
-    <h2>Dear My Best Friend 💖</h2>
-    <p>Today is all about you!</p>
-    <button onclick="startSurprise()">🎁 Open Your Surprise</button>
-  </section>
+  <div class="container">
+    <div class="card p-4">
+      <h1 class="mb-2">🎉 Birthday Countdown 🎉</h1>
+      <h4 class="text-muted mb-4">Jan 25 is Coming 💖</h4>
 
-  <!-- SURPRISE SECTION -->
-  <section id="surprise" class="hidden">
-    <h2>💝 A Special Message</h2>
-    <p>
-      Thank you for all the laughs, support, and memories.
-      May this year bring you happiness, success, and peace 🌟
-    </p>
-  </section>
+      <!-- COUNTDOWN -->
+      <div id="countdown" class="row g-3 justify-content-center">
+        <div class="col-6 col-md-3">
+          <div class="count-box" id="days">0</div>
+          <div class="label">Days</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="count-box" id="hours">0</div>
+          <div class="label">Hours</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="count-box" id="minutes">0</div>
+          <div class="label">Minutes</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="count-box" id="seconds">0</div>
+          <div class="label">Seconds</div>
+        </div>
+      </div>
 
-  <!-- MEMORY SECTION -->
-  <section class="memories">
-    <h2>📸 Our Memories</h2>
-    <div class="gallery">
-      <img src="assets/images/1.jpg">
-      <img src="assets/images/2.jpg">
-      <img src="assets/images/3.jpg">
+      <button class="btn btn-danger mt-4 px-4" onclick="openSurprise()">
+        🎁 Open Surprise
+      </button>
+
+      <!-- SURPRISE MESSAGE -->
+      <div id="surprise" class="mt-4 hidden">
+        <h3>💝 A Special Message</h3>
+        <p>
+          On Jan 25th..........
+        </p>
+      </div>
+
+      <footer class="mt-4 text-muted">
+        Made with ❤️ by Praveen
+      </footer>
     </div>
-  </section>
+  </div>
 
-  <!-- FOOTER -->
-  <footer>
-    <p>Made with ❤️ by Praveen</p>
-  </footer>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script src="cpk.js"></script>
+  <script>
+    function getNextJan25() {
+      const now = new Date();
+      let year = now.getFullYear();
+      let target = new Date(year, 0, 25, 0, 0, 0);
+
+      if (now > target) {
+        target = new Date(year + 1, 0, 25, 0, 0, 0);
+      }
+      return target;
+    }
+
+    const targetDate = getNextJan25();
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        document.getElementById("countdown").innerHTML =
+          "<h2 class='text-success'>🎂 Happy Birthday! 🎂</h2>";
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      document.getElementById("days").innerText = days;
+      document.getElementById("hours").innerText = hours;
+      document.getElementById("minutes").innerText = minutes;
+      document.getElementById("seconds").innerText = seconds;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    function openSurprise() {
+      document.getElementById("surprise").classList.remove("hidden");
+    }
+  </script>
+
 </body>
 </html>
