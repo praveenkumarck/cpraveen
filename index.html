@@ -1,160 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Birthday Countdown 🎂</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Birthday Surprise 🎂</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { margin:0; background:black; color:white; overflow:hidden; }
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+/* ===== TIMER CAT CARD ===== */
+.timer-card {
+  position: fixed !important;
+  top: 50%; left:50%;
+  transform: translate(-50%, -50%);
+  width: 250px; height: 300px;
+  background: #fff;
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  text-align:center; padding:20px;
+  z-index:50; box-shadow:0 0 40px #ff69b4;
+  animation: catBounce 1.5s ease-in-out infinite alternate;
+  position: relative;
+}
+.timer-card::before, .timer-card::after{
+  content:""; position:absolute; top:-30px; width:50px; height:50px;
+  background:#fff; border-radius:50%; transform: rotate(45deg);
+}
+.timer-card::before { left:30px; } /* left ear */
+.timer-card::after { right:30px; } /* right ear */
 
-  <style>
-    body {
-      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Segoe UI', sans-serif;
-    }
+@keyframes catBounce { 0%{transform:translate(-50%, -50%) scale(1);} 100%{transform:translate(-50%, -55%) scale(1.05);} }
 
-    .card {
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
+.timer-card h2 { font-size:22px; margin-bottom:10px; color:#ff4d6d; font-weight:bold; }
+.time { font-size:48px; font-weight:bold; margin-bottom:20px; }
+.glow { animation: glow 1s ease-in-out infinite alternate; }
+@keyframes glow { 0%{ box-shadow:0 0 20px #ffcc00; } 50%{ box-shadow:0 0 60px #ff4d6d; } 100%{ box-shadow:0 0 20px #ffcc00; } }
+.open-btn { background:linear-gradient(45deg,#ff4d6d,#ffcc00); border:none; padding:12px 20px; font-size:16px; color:white; border-radius:30px; cursor:pointer; }
 
-    .count-box {
-      background: #fff;
-      border-radius: 12px;
-      padding: 15px;
-      font-size: 28px;
-      font-weight: bold;
-      color: #ff4081;
-    }
+/* ===== FALLING HEARTS ===== */
+.heart { position:absolute; font-size:24px; animation:heartFall 4s linear forwards; }
+@keyframes heartFall { 0%{transform: translateY(-20px) scale(1);} 50%{transform: translateY(150px) scale(1.2);} 100%{transform: translateY(300px) scale(0); opacity:0;} }
 
-    .label {
-      font-size: 12px;
-      color: #555;
-    }
+/* ===== CONFETTI / FIREWORKS ===== */
+canvas { position:fixed; inset:0; pointer-events:none; z-index:10; }
 
-    .hidden {
-      display: none;
-    }
-
-    .carousel img {
-      border-radius: 15px;
-      height: 250px;
-      object-fit: contain;
-    }
-  </style>
+/* ===== MODAL & SLIDER ===== */
+.modal { position: fixed; inset:0; display: none; align-items:center; justify-content:center; backdrop-filter:blur(12px); }
+.modal.active { display:flex; }
+.card { background:white; color:black; width:95%; max-width:420px; border-radius:24px; padding:16px; animation: pop .6s ease; text-align:center;}
+@keyframes pop { from{transform:scale(.7);opacity:0} to{transform:scale(1);opacity:1} }
+.header { display:flex; justify-content:space-between; align-items:center; }
+.slider { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:12px; margin:16px 0; }
+.slider::-webkit-scrollbar { display:none; }
+.slide { min-width:100%; scroll-snap-align:center; position:relative; overflow:hidden; border-radius:18px; }
+.slide img { width:100%; height:240px; object-fit:cover; animation: zoom 8s ease-in-out infinite; }
+@keyframes zoom { 0%{transform:scale(1);} 100%{transform:scale(1.15);} }
+.message-box { background:#f7f7f7; border-radius:18px; padding:16px; text-align:center; }
+.gradient-text { font-size:24px; font-weight:bold; background:linear-gradient(270deg,#ff4d6d,#ffcc00,#7b2cff); background-size:600% 600%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:grad 6s ease infinite; }
+@keyframes grad {0%{background-position:0%} 50%{background-position:100%} 100%{background-position:0%}}
+.typing { margin-top:10px; font-size:18px; min-height:48px; }
+.cursor { width:2px; background:black; display:inline-block; animation:blink 1s infinite; }
+@keyframes blink {0%,50%{opacity:1} 51%,100%{opacity:0}}
+.viewer { position:fixed; inset:0; background:rgba(0,0,0,.95); display:none; align-items:center; justify-content:center; z-index:100; }
+.viewer.active { display:flex; }
+.viewer img { max-width:95%; max-height:95%; border-radius:20px; }
+.viewer span { position:absolute; top:20px; right:20px; font-size:28px; cursor:pointer; }
+</style>
 </head>
 <body>
 
-<div class="container">
-  <div class="card p-4 text-center">
+<canvas id="confetti"></canvas>
 
-    <h1>🎉 Birthday Countdown 🎉</h1>
-    <h5 class="text-muted mb-3">Jan 25 is Coming 💖</h5>
+<!-- TIMER CAT CARD -->
+<div class="timer-card" id="timerCard">
+  <h2>🎂 Birthday Countdown</h2>
+  <div class="time" id="time" style="color:deeppink !important;">00:00</div>
+  <button class="open-btn" onclick="manualOpen()">🎁 Open Surprise</button>
+</div>
 
-    <!-- COUNTDOWN -->
-    <div id="countdown" class="row g-3 justify-content-center mb-4">
-      <div class="col-6 col-md-3">
-        <div class="count-box" id="days">0</div>
-        <div class="label">Days</div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="count-box" id="hours">0</div>
-        <div class="label">Hours</div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="count-box" id="minutes">0</div>
-        <div class="label">Minutes</div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="count-box" id="seconds">0</div>
-        <div class="label">Seconds</div>
-      </div>
+<!-- FULLSCREEN VIEW -->
+<div class="viewer" id="viewer">
+  <span onclick="closeViewer()">❌</span>
+  <img id="viewerImg">
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="card">
+    <div class="header">
+      <h2>💖 Birthday Surprise</h2>
+      <span onclick="closeModal()">❌</span>
     </div>
-
-    <!-- IMAGE SLIDER -->
-    <div id="memoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-      <div class="carousel-inner">
-
-        <!-- Memories -->
-        <div class="carousel-item active">
-          <img src="assests/images/anime-cute-girl.jpg" class="d-block w-100" alt="Memory 1">
-        </div>
-        <div class="carousel-item">
-          <img src="assests/images/anime-girl.jpg" class="d-block w-100" alt="Memory 2">
-        </div>
-        <div class="carousel-item">
-          <img src="assests/images/anime-cat.jpg" class="d-block w-100" alt="Memory 3">
-        </div>
-
-      </div>
+    <div class="slider" id="slider"></div>
+    <div class="message-box">
+      <div class="gradient-text">🎂 Happy Birthday 🎂</div>
+      <div class="typing" id="typing"></div>
     </div>
-
-    <button class="btn btn-danger px-4" onclick="openSurprise()">🎁 Open Surprise</button>
-
-    <!-- SURPRISE -->
-    <div id="surprise" class="hidden mt-4">
-      <h3>💝 A Special Message</h3>
-      <p>
-        Coming Soon ...... 
-      </p>
-    </div>
-
-    <footer class="mt-4 text-muted">
-      Made with ❤️ by Praveen
-    </footer>
-
   </div>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-  function getNextJan25() {
-    const now = new Date();
-    let year = now.getFullYear();
-    let target = new Date(year, 0, 25, 0, 0, 0);
+/* ================= PHOTO SLIDER & TYPING ================= */
+const photos = [
+  "assests/images/anime-cat.jpg",
+  "assests/images/anime-cute-girl.jpg",
+  "assests/images/anime-girl.jpg",
+  "assests/images/4.jpg"
+];
+const messages = [
+  "",
+  "",
+  "",
+  ""
+];
 
-    if (now > target) {
-      target = new Date(year + 1, 0, 25, 0, 0, 0);
+const slider = document.getElementById("slider");
+const typingEl = document.getElementById("typing");
+let index=0, autoSlide;
+
+photos.forEach((img)=>{
+  const d=document.createElement("div");
+  d.className="slide";
+  d.innerHTML=`<img src="${img}" onclick="openViewer('${img}')">`;
+  slider.appendChild(d);
+});
+
+function typeText(text){
+  typingEl.innerHTML="";
+  let i=0;
+  (function t(){
+    if(i<text.length){
+      typingEl.innerHTML=text.slice(0,i+1)+`<span class="cursor"></span>`;
+      i++; setTimeout(t,50);
+    } else typingEl.innerHTML=text+`<span class="cursor"></span>`;
+  })();
+}
+
+function go(i){
+  slider.scrollTo({ left:slider.clientWidth*i, behavior:"smooth" });
+  index=i; typeText(messages[i]);
+}
+function startAuto(){
+  autoSlide=setInterval(()=>{ index=(index+1)%photos.length; go(index); },3000);
+}
+function openModal(){
+  document.getElementById("modal").classList.add("active");
+  go(0); startAuto();
+}
+function closeModal(){
+  document.getElementById("modal").classList.remove("active");
+  clearInterval(autoSlide);
+}
+function openViewer(src){
+  document.getElementById("viewerImg").src=src;
+  document.getElementById("viewer").classList.add("active");
+}
+function closeViewer(){
+  document.getElementById("viewer").classList.remove("active");
+}
+
+/* ================= ❤️ HEART TAP ================= */
+document.addEventListener("click",e=>{
+  const h=document.createElement("div");
+  h.className="heart";
+  h.innerText="❤️";
+  h.style.left=e.clientX+"px";
+  h.style.top=e.clientY+"px";
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(),4000);
+});
+
+/* ================= TIMER + FALL HEARTS + LIGHTNING + FIREWORKS ================= */
+(function(){
+  const targetTime = Date.now() + 60000; // 1 min test
+  let opened=false;
+
+  function playTick(){
+    const tick = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+    tick.play();
+  }
+
+  function spawnHeart(){
+    const e=document.createElement("div");
+    e.className="heart";
+    e.innerText="💖";
+    e.style.left=Math.random()*window.innerWidth+"px";
+    e.style.top="-50px";
+    document.body.appendChild(e);
+    setTimeout(()=>e.remove(),4000);
+  }
+
+  function updateTimer(){
+    const now = Date.now();
+    const diff = targetTime-now;
+    if(diff<=0){ if(!opened) triggerMidnight(); return; }
+    const s=Math.floor(diff/1000);
+    const m=Math.floor(s/60);
+    const sec=s%60;
+    document.getElementById("time").innerText=String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0");
+
+    if(s<=10 && s>0){
+      playTick();
+      document.getElementById("timerCard").classList.add("glow");
+      spawnHeart();
     }
-    return target;
   }
 
-  const targetDate = getNextJan25();
+  function triggerMidnight(){
+    opened=true;
+    document.getElementById("timerCard").style.display="none";
+    openModal();
+    launchFireworks();
+  }
 
-  function updateCountdown() {
-    const now = new Date();
-    const diff = targetDate - now;
+  window.manualOpen=function(){
+    if(!opened){ opened=true; document.getElementById("timerCard").style.display="none"; openModal(); launchFireworks(); }
+  }
 
-    if (diff <= 0) {
-      document.getElementById("countdown").innerHTML =
-        "<h2 class='text-success'>🎂 Happy Birthday! 🎂</h2>";
-      return;
+  setInterval(updateTimer,1000);
+  updateTimer();
+
+  /* ===== FIREWORKS ===== */
+  const particles=[];
+  const canvas=document.getElementById("confetti");
+  const ctx=canvas.getContext("2d");
+  canvas.width=innerWidth; canvas.height=innerHeight;
+  function launchFireworks(){
+    for(let i=0;i<8;i++){
+      explode(Math.random()*canvas.width, Math.random()*canvas.height/2);
     }
-
-    document.getElementById("days").innerText =
-      Math.floor(diff / (1000 * 60 * 60 * 24));
-    document.getElementById("hours").innerText =
-      Math.floor((diff / (1000 * 60 * 60)) % 24);
-    document.getElementById("minutes").innerText =
-      Math.floor((diff / (1000 * 60)) % 60);
-    document.getElementById("seconds").innerText =
-      Math.floor((diff / 1000) % 60);
   }
-
-  setInterval(updateCountdown, 1000);
-  updateCountdown();
-
-  function openSurprise() {
-    document.getElementById("surprise").classList.remove("hidden");
+  function explode(x,y){
+    for(let i=0;i<60;i++){
+      particles.push({x,y,dx:(Math.random()-0.5)*6,dy:(Math.random()-0.5)*6,life:60,color:`hsl(${Math.random()*360},100%,50%)`});
+    }
   }
+  function drawFireworks(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach((p,i)=>{
+      ctx.fillStyle=p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,2,0,Math.PI*2);
+      ctx.fill();
+      p.x+=p.dx; p.y+=p.dy; p.life--;
+      if(p.life<=0) particles.splice(i,1);
+    });
+    requestAnimationFrame(drawFireworks);
+  }
+  drawFireworks();
+
+})();
 </script>
-
 </body>
 </html>
